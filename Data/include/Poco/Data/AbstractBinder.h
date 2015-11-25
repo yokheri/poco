@@ -39,16 +39,59 @@ namespace Poco {
 namespace Data {
 
 
-typedef NullType NullData;
+enum NullData
+{
+	NULL_GENERIC = Poco::NULL_GENERIC,
+	DATA_NULL_INTEGER = 1,
+	DATA_NULL_STRING = 2,
+	DATA_NULL_DATE = 3,
+	DATA_NULL_TIME = 4,
+	DATA_NULL_DATETIME = 5,
+	DATA_NULL_BLOB = 6,
+	DATA_NULL_FLOAT = 7
+};
+
+
+struct NullValue
+{
+
+	NullValue()
+	{}
+  
+	template <typename T>
+	operator Poco::Nullable<T>() const
+	{
+		return Poco::Nullable<T>();
+	}
+
+	template <typename T>
+	static NullData nullCode()
+	{
+		return Data::NULL_GENERIC;
+	}
+
+};
 
 
 namespace Keywords {
 
-
-static const NullData null = NULL_GENERIC;
-
+static const NullValue null;
 
 } // namespace Keywords
+
+
+template <typename T>
+inline bool operator==(const NullValue& nv, const Nullable<T>& n)
+{
+	return n.isNull();
+}
+
+
+template <typename T>
+inline bool operator!=(const NullValue& nv, const Nullable<T>& n)
+{
+	return !n.isNull();
+}
 
 
 class Data_API AbstractBinder
@@ -191,7 +234,7 @@ public:
 		/// Binds a long.
 
 	virtual void bind(std::size_t pos, const unsigned long& val, Direction dir = PD_IN, const WhenNullCb& nullCb = WhenNullCb()) = 0;
-		/// Binds an unsigned long.
+		/// Binds an unsiged long.
 
 	virtual void bind(std::size_t pos, const std::vector<long>& val, Direction dir = PD_IN);
 		/// Binds a long vector.
